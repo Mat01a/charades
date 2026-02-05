@@ -1,0 +1,6 @@
+static/
+.env
+venv
+*.un~
+*.py~
+*.gitignore~
