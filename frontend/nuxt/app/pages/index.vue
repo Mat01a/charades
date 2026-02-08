@@ -119,8 +119,8 @@ function clearCanvas()
                 <div class="col-span-8 bg-neutral-100">
                     <canvas class="w-full h-full rounded-sm" id="canvas" />
                 </div>
+                <!-- chat -->
                 <div class="col-start-10 col-span-3 bg-neutral-200 rounded-r-sm p-2 text-slate-900">
-                        {{ username }}: Hello
                 </div>
             </div>
         </div>
