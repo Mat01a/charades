@@ -20,32 +20,31 @@ function chooseColor(color)
 
 onMounted(() => {
 
-const canvas = document.querySelector("#canvas");
-const ctx = canvas.getContext("2d");
+    const canvas = document.querySelector("#canvas");
+    const ctx = canvas.getContext("2d");
 
-canvasWidth = canvas.offsetWidth
-canvasHeight = canvas.offsetHeight
-ctx.canvas.width = canvasWidth
-ctx.canvas.height = canvasHeight
+    canvasWidth = canvas.offsetWidth
+    canvasHeight = canvas.offsetHeight
+    ctx.canvas.width = canvasWidth
+    ctx.canvas.height = canvasHeight
 
-ctx.strokeStyle = pickedColor.value;
-ctx.lineJoin = "round";
-ctx.lineCap = "round";
-ctx.lineWidth = 10;
+    ctx.strokeStyle = pickedColor.value;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.lineWidth = 10;
 
-let isDrawing = false;
-let lastX = 0;
-let lastY = 0;
-let direction = true;
-canvas.addEventListener("mousedown", (e) => {
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    let direction = true;
+    canvas.addEventListener("mousedown", (e) => {
 	isDrawing = true
-	console.log(e)
 	lastX = e.offsetX
 	lastY = e.offsetY
 })
 canvas.addEventListener("mousemove", draw)
 canvas.addEventListener("mouseup", () => {
-	isDrawing = false
+    isDrawing = false
 })
 
 function draw(e)
@@ -70,7 +69,6 @@ function clearCanvas()
     const canvas = document.querySelector("#canvas")
     const ctx = canvas.getContext("2d")
 	ctx.clearRect(0, 0, canvasWidth, canvasHeight)
-    console.log("CC")
 }
 
 </script>
