@@ -1,4 +1,8 @@
 <script setup lang="ts">
+// WS connection
+const socket = new WebSocket("ws://127.0.0.1:8000/ws/chat/")
+
+// Refs
 const username = ref('')
 const isOpened = ref(true)
 const pickedColor = ref(null)
@@ -43,7 +47,16 @@ onMounted(() => {
 	isDrawing = true
 	lastX = e.offsetX
 	lastY = e.offsetY
+
+    //WS connection
+    socket.onopen = () => {}
 })
+
+onBeforeUnmount(() =>
+{
+    socket.close() 
+})
+
 canvas.addEventListener("mousemove", draw)
 canvas.addEventListener("mouseup", () => {
     isDrawing = false
@@ -73,6 +86,12 @@ function clearCanvas()
 	ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 }
 
+function sendMessage()
+{
+    let currentMessage = `${username.value}: ${chatInput.value}`
+    messages.push(currentMessage)
+    chatInput.value = null
+}
 
 </script>
 
@@ -129,7 +148,7 @@ function clearCanvas()
                     </div>
                     <div class="w-full h-10 my-2 py-1 bg-neutral-300 grid grid-cols-12 grid-rows-2 overflow-hidden p-2 gap-2">
                         <input type="text" class="p-2 col-span-9 h-8" v-model="chatInput"/>
-                        <UButton type="submit" class="col-span-2 m-auto cursor-pointer hover:bg-green-500 transition-all duration-500 ease-in-out text-white font-bold">Send</UButton>
+                        <UButton type="submit" class="col-span-2 m-auto cursor-pointer hover:bg-green-500 transition-all duration-500 ease-in-out text-white font-bold" @click="sendMessage">Send</UButton>
                     </div>
                 </div>
             </div>
