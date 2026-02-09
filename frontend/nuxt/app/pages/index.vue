@@ -3,9 +3,11 @@ const username = ref('')
 const isOpened = ref(true)
 const pickedColor = ref(null)
 const pickedTool = ref(null)
+const chatInput = ref(null)
 
 let canvasWidth = 0
 let canvasHeight = 0
+const messages = []
 
 function saveUsername()
 {
@@ -71,6 +73,7 @@ function clearCanvas()
 	ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 }
 
+
 </script>
 
 <template>
@@ -119,6 +122,15 @@ function clearCanvas()
                 </div>
                 <!-- chat -->
                 <div class="col-start-10 col-span-3 bg-neutral-200 rounded-r-sm p-2 text-slate-900">
+                    <div class="w-full h-113">
+                        <p v-for="message in messages">
+                            {{ message }}
+                        </p>
+                    </div>
+                    <div class="w-full h-10 my-2 py-1 bg-neutral-300 grid grid-cols-12 grid-rows-2 overflow-hidden p-2 gap-2">
+                        <input type="text" class="p-2 col-span-9 h-8" v-model="chatInput"/>
+                        <UButton type="submit" class="col-span-2 m-auto cursor-pointer hover:bg-green-500 transition-all duration-500 ease-in-out text-white font-bold">Send</UButton>
+                    </div>
                 </div>
             </div>
         </div>
