@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "some_key") 
 DEBUG = True
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_A LLOWED_HOSTS", "127.0.0.1").split(",")
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(",")
 
 
 # Application definition
@@ -17,6 +17,7 @@ ALLOWED_HOSTS = os.environ.get("DJANGO_A LLOWED_HOSTS", "127.0.0.1").split(",")
 INSTALLED_APPS = [
     'daphne',
     'api',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,10 +56,10 @@ TEMPLATES = [
 
 #WSGI_APPLICATION = 'puns_game.wsgi.application'
 
-CHANNEL_LAYER = {
+CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {"hosts": [("127.0.0.1", 639)]}
+        "CONFIG": {"hosts": [("redis", 6379)]}
     }
 }
 
