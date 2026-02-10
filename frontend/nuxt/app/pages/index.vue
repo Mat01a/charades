@@ -136,7 +136,7 @@ function sendMessage()
                          </UButton>
                     </div>
                 </div>
-                <div class="col-span-8 bg-neutral-100">
+                <div class="col-span-8 bg-white">
                     <canvas class="w-full h-full rounded-sm" id="canvas" />
                 </div>
                 <!-- chat -->

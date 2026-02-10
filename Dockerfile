@@ -1,5 +1,5 @@
 # Official Python image
-FROM python:3.15
+FROM python:3.13-slim
 
 # Create app dir
 RUN mkdir /app
@@ -11,7 +11,7 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # Prevent Python from bufferint stdout and stderr
-ENV PYTHONNUNBUFFERED=1
+ENV PYTHONUNBUFFERED=1
 
 # Upgrade pip
 RUN pip install --upgrade pip

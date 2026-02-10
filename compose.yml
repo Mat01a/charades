@@ -1,11 +1,15 @@
 services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
   db:
     container_name: db
     image: postgres:17
     environment:
-      POSTGRES_DB: ${DATABASE_NAME}
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - 5432:5432
     volumes:
