@@ -3,6 +3,18 @@ services:
     build: .
     ports:
       - "8000:8000"
+    environment:
+      DEBUG: ${DEBUG}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    env_file:
+      - .env
+    networks:
+      - puns
   db:
     container_name: db
     image: postgres:17
@@ -11,11 +23,16 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - 5432:5432
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
       - .env
+    networks:
+      - puns
+  redis:
+    container_name: redis
+    image: redis:7
     networks:
       - puns
 
