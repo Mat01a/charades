@@ -1,17 +1,31 @@
 <script setup lang="ts">
-// WS connection
-const socket = new WebSocket("ws://127.0.0.1:8000/ws/chat/")
-
 // Refs
 const username = ref('')
 const isOpened = ref(true)
 const pickedColor = ref(null)
 const pickedTool = ref(null)
 const chatInput = ref(null)
+const roomName = ref(null)
+// WS connection
+let url = "ws://127.0.0.1:8000/ws/chat/" + roomName.value
+let socket = new WebSocket(url)
 
+let canvas = null
+let ctx = null
 let canvasWidth = 0
 let canvasHeight = 0
-const messages = []
+const messages = ref([])
+
+// TODO: use this customToken for simple anonymous unique identity
+const customToken = Math.random().toString().substr(2);
+
+
+// Painting
+let isDrawing = false;
+let lastX = 0;
+let lastY = 0;
+let direction = true;
+
 
 function saveUsername()
 {
@@ -23,11 +37,31 @@ function chooseColor(color)
     pickedColor.value = color
 }
 
+onUpdated(() => {
+    // HACK: not sending color through socket
+    // HACK: not clear canvas on eraser button through sockets
+    socket.onmessage = (message) => {
+        let parsedJson = JSON.parse(message.data)
+        if (parsedJson.type == 'message')
+        {
+            let currentMessage = parsedJson.user + ":" + parsedJson.message
+            messages.value.push(currentMessage)
+            console.log(messages)
+        }
+        else if (parsedJson.type == 'draw')
+        {
+            if (parsedJson.username != username.value)
+                recive_drawing({"lastX": parsedJson.last_x, "lastY": parsedJson.last_y, "offsetX": parsedJson.offset_x, "offsetY": parsedJson.offset_y})
+        }
+    }
+})
+
 
 onMounted(() => {
 
-    const canvas = document.querySelector("#canvas");
-    const ctx = canvas.getContext("2d");
+    // Canvas
+    canvas = document.querySelector("#canvas");
+    ctx = canvas.getContext("2d");
 
     canvasWidth = canvas.offsetWidth
     canvasHeight = canvas.offsetHeight
@@ -39,33 +73,44 @@ onMounted(() => {
     ctx.lineCap = "round";
     ctx.lineWidth = 10;
 
-    let isDrawing = false;
-    let lastX = 0;
-    let lastY = 0;
-    let direction = true;
     canvas.addEventListener("mousedown", (e) => {
-	isDrawing = true
-	lastX = e.offsetX
-	lastY = e.offsetY
-
-    //WS connection
-    socket.onopen = () => {}
+        isDrawing = true
+        lastX = e.offsetX
+        lastY = e.offsetY
+    })
+    canvas.addEventListener("mousemove", draw)
+    canvas.addEventListener("mouseup", () => {
+        isDrawing = false
+    })
 })
 
 onBeforeUnmount(() =>
 {
+    // Close connection on closing web
+    socket = new WebSocket(url)
     socket.close() 
 })
 
-canvas.addEventListener("mousemove", draw)
-canvas.addEventListener("mouseup", () => {
+// TODO: refactor recive_drawing and draw into one function
+function recive_drawing(e)
+{
+    console.log(e)
+    isDrawing = true
+    lastX = e.lastX
+    lastY = e.lastY
+    ctx.strokeStyle = pickedColor.value
+	ctx.beginPath()
+	ctx.moveTo(lastX, lastY)
+	ctx.lineTo(e.offsetX, e.offsetY)
+	ctx.stroke()
     isDrawing = false
-})
+}
 
 function draw(e)
 {
 	if (!isDrawing) return;
 
+    socket.send(JSON.stringify({"type": "draw", "username": username.value, "last_x": lastX, "last_y": lastY, "offset_x": e.offsetX, "offset_y": e.offsetY}))
 	ctx.strokeStyle = pickedColor.value
 	ctx.beginPath()
 	ctx.moveTo(lastX, lastY)
@@ -74,9 +119,9 @@ function draw(e)
 	lastX = e.offsetX
 	lastY = e.offsetY
 
+
 }
 
-})
 
 
 function clearCanvas()
@@ -88,10 +133,32 @@ function clearCanvas()
 
 function sendMessage()
 {
-    let currentMessage = `${username.value}: ${chatInput.value}`
-    messages.push(currentMessage)
+    // FIXME: requires proper error catching
+    try
+    {
+        socket.send(JSON.stringify({"type": "message", "username": username.value, "message": chatInput.value}))
+        
+    }
+    catch(e)
+    {
+        console.log(JSON.stringify(e))
+    }
     chatInput.value = null
 }
+
+function connect()
+{
+    socket.close()
+    //WS connection
+    let url = "ws://127.0.0.1:8000/ws/chat/" + roomName.value
+    socket = new WebSocket(url)
+    socket.onopen = () => {
+        clearCanvas()
+        messages.value = []
+    }
+
+}
+
 
 </script>
 
@@ -99,6 +166,15 @@ function sendMessage()
     <div class="grid grid-cols-12 grid-rows-6 max-w-7xl w-full h-screen m-auto">
         <div class="row-span-1 col-span-12 text-center font-bold text-4xl p-8">Puns game: {{ username }}</div>
         <div class="row-start-2 row-span-4 col-start-2 col-span-10 bg-slate-800 rounded-xl shadow-2xl grid grid-cols-12 grid-rows-12 p-4">
+            <div class="row-span-2 col-span-12 grid grid-rows-3">
+                <div class="px-1 row-span-1 text-lg font-bold">
+                    Input room name:
+                </div>
+                <div class="row-span-1">
+                    <UInput placeholder="room name" v-model="roomName"/>
+                    <UButton class="mx-2" @click="connect">Connect</UButton>
+                </div>
+            </div>
             <ClientOnly>
                 <UModal :dismissible="true" v-model:open="isOpened">
                     <!-- modal -->
