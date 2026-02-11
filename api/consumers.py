@@ -42,7 +42,8 @@ class PersonlChatConsumer(AsyncWebsocketConsumer):
                         'last_x': data["last_x"],
                         'last_y': data["last_y"],
                         'offset_x': data["offset_x"],
-                        'offset_y': data["offset_y"]
+                        'offset_y': data["offset_y"],
+			'color': data['color']
                     }
                 )
         # FIXME: add proper error handling.
@@ -71,7 +72,7 @@ class PersonlChatConsumer(AsyncWebsocketConsumer):
     async def draw(self, event):
         """Handling sending drawing signals to all users in game room"""
         try:
-            await self.send(text_data = json.dumps({'type': 'draw', 'username': event["username"], 'last_x': event["last_x"], 'last_y': event['last_y'], 'offset_x': event['offset_x'], 'offset_y': event['offset_y']}))
+            await self.send(text_data = json.dumps({'type': 'draw', 'color': event['color'], 'username': event["username"], 'last_x': event["last_x"], 'last_y': event['last_y'], 'offset_x': event['offset_x'], 'offset_y': event['offset_y']}))
         # FIXME: add proper error handling
         except json.JSONDecodeError:
             await self.send(text_data=json.dumps({

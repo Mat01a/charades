@@ -51,7 +51,7 @@ onUpdated(() => {
         else if (parsedJson.type == 'draw')
         {
             if (parsedJson.username != username.value)
-                recive_drawing({"lastX": parsedJson.last_x, "lastY": parsedJson.last_y, "offsetX": parsedJson.offset_x, "offsetY": parsedJson.offset_y})
+                recive_drawing({"lastX": parsedJson.last_x, "color": parsedJson.color, "lastY": parsedJson.last_y, "offsetX": parsedJson.offset_x, "offsetY": parsedJson.offset_y})
         }
     }
 })
@@ -98,7 +98,7 @@ function recive_drawing(e)
     isDrawing = true
     lastX = e.lastX
     lastY = e.lastY
-    ctx.strokeStyle = pickedColor.value
+    ctx.strokeStyle = e.color
 	ctx.beginPath()
 	ctx.moveTo(lastX, lastY)
 	ctx.lineTo(e.offsetX, e.offsetY)
@@ -110,7 +110,7 @@ function draw(e)
 {
 	if (!isDrawing) return;
 
-    socket.send(JSON.stringify({"type": "draw", "username": username.value, "last_x": lastX, "last_y": lastY, "offset_x": e.offsetX, "offset_y": e.offsetY}))
+    socket.send(JSON.stringify({"type": "draw", "color": pickedColor.value, "username": username.value, "last_x": lastX, "last_y": lastY, "offset_x": e.offsetX, "offset_y": e.offsetY}))
 	ctx.strokeStyle = pickedColor.value
 	ctx.beginPath()
 	ctx.moveTo(lastX, lastY)
