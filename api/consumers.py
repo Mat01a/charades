@@ -2,13 +2,21 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 import secrets
 
+from api.services.game_service import GameService
+from api.repository.redis import Redis
 
 class PersonlChatConsumer(AsyncWebsocketConsumer):
     # TODO: add user-specific token identity
     async def connect(self):
         """Connecting users with websockets into game rooms"""
+
         room_name = self.scope['url_route']['kwargs'].get('room_name')
+
         self.room_group_name = room_name
+        self.service = GameService(repo=Redis())
+        channel_name = self.channel_name
+        self.service.create_room(room_id=room_name, user=channel_name)
+
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
@@ -16,7 +24,7 @@ class PersonlChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
 
-    # TODO: refactor code by splitting the main if block into separate functions
+    # TODO: split logic into services
     async def receive(self, text_data):
         """Handling reciving websocket signals"""
         try:
