@@ -5,5 +5,4 @@ venv
 *.py~
 *.gitignore~
 *~
-puns_game/__pycache__/
-api/__pycache__/
+**/__pycache__/
