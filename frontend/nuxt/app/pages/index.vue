@@ -1,26 +1,19 @@
 <script setup lang="ts">
+import DrawingCanvas from '~/components/DrawingCanvas.vue'
+import type { ChatMessage } from '~/types/chat-message'
+import type { DrawingData } from '~/types/drawing-data'
+
 // Refs
 const username = ref('')
 const isOpened = ref(true)
-const pickedColor = ref(null)
 const pickedTool = ref(null)
 const chatInput = ref(null)
 const roomName = ref(null)
+const canvas = ref(null)
+const messages = ref([])
 // WS connection
 let url = "ws://127.0.0.1:8000/ws/chat/" + roomName.value
 let socket
-
-let canvas = null
-let ctx = null
-let canvasWidth = 0
-let canvasHeight = 0
-const messages = ref([])
-
-// Painting
-let isDrawing = false;
-let lastX = 0;
-let lastY = 0;
-let direction = true;
 
 
 function saveUsername()
@@ -36,85 +29,14 @@ function chooseColor(color)
 onUpdated(() => {
     // HACK: not sending color through socket
     // HACK: not clear canvas on eraser button through sockets
-    if (!socket)
-        return
-    console.log(socket)
 })
-
-
-onMounted(() => {
-
-    // Canvas
-    canvas = document.querySelector("#canvas");
-    ctx = canvas.getContext("2d");
-
-    canvasWidth = canvas.offsetWidth
-    canvasHeight = canvas.offsetHeight
-    ctx.canvas.width = canvasWidth
-    ctx.canvas.height = canvasHeight
-
-    ctx.strokeStyle = pickedColor.value;
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-    ctx.lineWidth = 10;
-
-    canvas.addEventListener("mousedown", (e) => {
-        isDrawing = true
-        lastX = e.offsetX
-        lastY = e.offsetY
-    })
-    canvas.addEventListener("mousemove", draw)
-    canvas.addEventListener("mouseup", () => {
-        isDrawing = false
-    })
-})
-
-
-
-// TODO: refactor recive_drawing and draw into one function
-function recive_drawing(e)
-{
-    console.log(e)
-    isDrawing = true
-    lastX = e.lastX
-    lastY = e.lastY
-    ctx.strokeStyle = e.color
-	ctx.beginPath()
-	ctx.moveTo(lastX, lastY)
-	ctx.lineTo(e.offsetX, e.offsetY)
-	ctx.stroke()
-    isDrawing = false
-}
-
-function draw(e)
-{
-	if (!isDrawing) return;
-
-    socket.send(JSON.stringify({"type": "draw", "color": pickedColor.value, "username": username.value, "last_x": lastX, "last_y": lastY, "offset_x": e.offsetX, "offset_y": e.offsetY}))
-	ctx.strokeStyle = pickedColor.value
-	ctx.beginPath()
-	ctx.moveTo(lastX, lastY)
-	ctx.lineTo(e.offsetX, e.offsetY)
-	ctx.stroke()
-	lastX = e.offsetX
-	lastY = e.offsetY
-
-
-}
 
 
 onBeforeUnmount(() => {
  // Close connection on closing web
- socket.close()
+ if (socket)
+     socket.close()
 })
-
-
-function clearCanvas()
-{
-    const canvas = document.querySelector("#canvas")
-    const ctx = canvas.getContext("2d")
-	ctx.clearRect(0, 0, canvasWidth, canvasHeight)
-}
 
 function sendMessage(data)
 {
@@ -137,7 +59,7 @@ function connect()
     let url = "ws://127.0.0.1:8000/ws/chat/" + roomName.value
     socket = new WebSocket(url)
     socket.onopen = () => {
-        clearCanvas()
+        canvas.value.clearCanvas()
         messages.value = []
     }
 
@@ -148,13 +70,22 @@ function connect()
         let currentMessage = parsedJson.user + ":" + parsedJson.message
         messages.value.push(currentMessage)
     }
-    else if (parsedJson.type == 'draw')
+    else if (parsedJson.type == 'recive_draw')
     {
         if (parsedJson.username != username.value)
-            recive_drawing({"lastX": parsedJson.last_x, "color": parsedJson.color, "lastY": parsedJson.last_y, "offsetX": parsedJson.offset_x, "offsetY": parsedJson.offset_y})
+        {
+            canvas.value.reciveDrawing(parsedJson)
+        }
+            //recive_drawing({"lastX": parsedJson.last_x, "color": parsedJson.color, "lastY": parsedJson.last_y, "offsetX": parsedJson.offset_x, "offsetY": parsedJson.offset_y})
     }
 }
 
+}
+
+function sendDrawing(data: DrawingData)
+{
+    const new_data = JSON.stringify({"type": data.type, "color": data.color, "username": username.value, "last_x": data.last_x, "last_y": data.last_y, "offset_x": data.offset_x, "offset_y": data.offset_y})
+    socket.send(new_data)
 }
 
 
@@ -188,31 +119,7 @@ function connect()
                 </UModal>
             </ClientOnly>
             <div class="row-start-3 row-span-10 col-span-12 bg-neutral-50 rounded-sm grid grid-cols-12">
-                <div class="col-span-1 bg-neutral-200 rounded-l-sm">
-                    <div class="grid grid-cols-2 gap-2 h-full grid-rows-12 p-2">
-                        <ColorButton @click="() => {chooseColor('green')}" class="col-span-1 row-span-1 bg-green-500"/>
-                        <ColorButton @click="() => {chooseColor('red')}" class="col-span-1 row-span-1 bg-red-500"/>
-                        <ColorButton @click="() => {chooseColor('orange')}" class="col-span-1 row-span-1 bg-orange-500"/>
-                        <ColorButton @click="() => {chooseColor('brown')}" class="col-span-1 row-span-1 bg-yellow-900"/>
-                        <ColorButton @click="() => {chooseColor('yellow')}" class="col-span-1 row-span-1 bg-yellow-500"/>
-                        <ColorButton @click="() => {chooseColor('blue')}" class="col-span-1 row-span-1 bg-blue-500"/>
-                        <ColorButton @click="() => {chooseColor('purple')}" class="col-span-1 row-span-1 bg-purple-500"/>
-                        <ColorButton @click="() => {chooseColor('white')}" class="col-span-1 row-span-1 bg-white"/>
-                        <ColorButton @click="() => {chooseColor('gray')}" class="col-span-1 row-span-1 bg-gray-500"/>
-                        <ColorButton @click="() => {chooseColor('black')}" class="col-span-1 row-span-1 bg-black"/>
-
-                        <!-- buttons -->
-                         <UButton class="col-span-2 bg-slate-300 justify-center row-span-1" v-on:click="clearCanvas" >
-                            <UIcon name="i-mdi:eraser" class="bg-slate-900 scale-200"/>
-                         </UButton>
-                         <UButton class="col-span-2 bg-slate-300 justify-center">
-                            <UIcon name="i-material-symbols:brush" class="bg-slate-900 scale-200"/>
-                         </UButton>
-                    </div>
-                </div>
-                <div class="col-span-8 bg-white">
-                    <canvas class="w-full h-full rounded-sm" id="canvas" />
-                </div>
+                <DrawingCanvas @send-socket="sendDrawing" ref="canvas"/>
                 <Chat @send-message="sendMessage" :messages="messages"/>
             </div>
         </div>
