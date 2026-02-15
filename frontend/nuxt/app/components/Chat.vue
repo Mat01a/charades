@@ -8,14 +8,12 @@ const emits = defineEmits<{
 const props = defineProps<{
     messages: { type: Array<String> }
 }>()
-const messages = ref()
 
 function sendMessage()
 {
     // FIXME: requires proper error catching
     try
     {
-        console.log(chatInput.value)
         emits('sendMessage', {"type": "message", "message": chatInput.value})
         
     }
