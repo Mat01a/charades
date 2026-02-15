@@ -8,17 +8,13 @@ const chatInput = ref(null)
 const roomName = ref(null)
 // WS connection
 let url = "ws://127.0.0.1:8000/ws/chat/" + roomName.value
-let socket = new WebSocket(url)
+let socket
 
 let canvas = null
 let ctx = null
 let canvasWidth = 0
 let canvasHeight = 0
 const messages = ref([])
-
-// TODO: use this customToken for simple anonymous unique identity
-const customToken = Math.random().toString().substr(2);
-
 
 // Painting
 let isDrawing = false;
@@ -40,20 +36,9 @@ function chooseColor(color)
 onUpdated(() => {
     // HACK: not sending color through socket
     // HACK: not clear canvas on eraser button through sockets
-    socket.onmessage = (message) => {
-        let parsedJson = JSON.parse(message.data)
-        if (parsedJson.type == 'message')
-        {
-            let currentMessage = parsedJson.user + ":" + parsedJson.message
-            messages.value.push(currentMessage)
-            console.log(messages)
-        }
-        else if (parsedJson.type == 'draw')
-        {
-            if (parsedJson.username != username.value)
-                recive_drawing({"lastX": parsedJson.last_x, "color": parsedJson.color, "lastY": parsedJson.last_y, "offsetX": parsedJson.offset_x, "offsetY": parsedJson.offset_y})
-        }
-    }
+    if (!socket)
+        return
+    console.log(socket)
 })
 
 
@@ -84,12 +69,7 @@ onMounted(() => {
     })
 })
 
-onBeforeUnmount(() =>
-{
-    // Close connection on closing web
-    socket = new WebSocket(url)
-    socket.close() 
-})
+
 
 // TODO: refactor recive_drawing and draw into one function
 function recive_drawing(e)
@@ -123,6 +103,11 @@ function draw(e)
 }
 
 
+onBeforeUnmount(() => {
+ // Close connection on closing web
+ socket.close()
+})
+
 
 function clearCanvas()
 {
@@ -131,12 +116,13 @@ function clearCanvas()
 	ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 }
 
-function sendMessage()
+function sendMessage(data)
 {
     // FIXME: requires proper error catching
     try
     {
-        socket.send(JSON.stringify({"type": "message", "username": username.value, "message": chatInput.value}))
+        socket.send(JSON.stringify({"type": "message", "username": username.value, "message": data.message}))
+        //messages.value.push(`${username.value}: ${data.message}`)
         
     }
     catch(e)
@@ -148,14 +134,26 @@ function sendMessage()
 
 function connect()
 {
-    socket.close()
-    //WS connection
     let url = "ws://127.0.0.1:8000/ws/chat/" + roomName.value
     socket = new WebSocket(url)
     socket.onopen = () => {
         clearCanvas()
         messages.value = []
     }
+
+    socket.onmessage = (message) => {
+    let parsedJson = JSON.parse(message.data)
+    if (parsedJson.type == 'message')
+    {
+        let currentMessage = parsedJson.user + ":" + parsedJson.message
+        messages.value.push(currentMessage)
+    }
+    else if (parsedJson.type == 'draw')
+    {
+        if (parsedJson.username != username.value)
+            recive_drawing({"lastX": parsedJson.last_x, "color": parsedJson.color, "lastY": parsedJson.last_y, "offsetX": parsedJson.offset_x, "offsetY": parsedJson.offset_y})
+    }
+}
 
 }
 
@@ -215,18 +213,7 @@ function connect()
                 <div class="col-span-8 bg-white">
                     <canvas class="w-full h-full rounded-sm" id="canvas" />
                 </div>
-                <!-- chat -->
-                <div class="col-start-10 col-span-3 bg-neutral-200 rounded-r-sm p-2 text-slate-900">
-                    <div class="w-full h-113">
-                        <p v-for="message in messages">
-                            {{ message }}
-                        </p>
-                    </div>
-                    <div class="w-full h-10 my-2 py-1 bg-neutral-300 grid grid-cols-12 grid-rows-2 overflow-hidden p-2 gap-2">
-                        <input type="text" class="p-2 col-span-9 h-8" v-model="chatInput"/>
-                        <UButton type="submit" class="col-span-2 m-auto cursor-pointer hover:bg-green-500 transition-all duration-500 ease-in-out text-white font-bold" @click="sendMessage">Send</UButton>
-                    </div>
-                </div>
+                <Chat @send-message="sendMessage" :messages="messages"/>
             </div>
         </div>
     </div>        
