@@ -14,13 +14,11 @@ class GameServiceTest(TestCase):
 
     def test_create_game_room(self):
         """Test creating room"""
-        self.service.create_room(room_id=1, user='test')
+        self.service.handle_user(room_id=1, user='test')
 
 
-    def test_create_game_room_duplicates(self):
-        """Test if you can try to create an room with existing room_id"""
-        self.service.create_room(room_id=2, user='test2')
-        with self.assertRaises(ValueError) as context:
-            self.service.create_room(room_id=2, user='test3')
-        self.assertEqual(str(context.exception), "Room with that id exists")
+    def test_handling_multiple_users_joining_same_room(self):
+        """Test if you can try to join multiple users an room"""
+        self.service.handle_user(room_id=2, user='test2')
+        self.service.handle_user(room_id=2, user='test3')
 

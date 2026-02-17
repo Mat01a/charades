@@ -64,7 +64,6 @@ function draw(e)
 }
 function reciveDrawing(e)
 {
-    console.log(e)
     isDrawing = true
     lastX = e.last_x
     lastY = e.last_y

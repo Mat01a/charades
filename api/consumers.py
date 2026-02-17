@@ -15,7 +15,8 @@ class PersonlChatConsumer(AsyncWebsocketConsumer):
         self.room_group_name = room_name
         self.service = GameService(repo=Redis())
         channel_name = self.channel_name
-        self.service.create_room(room_id=room_name, user=channel_name)
+
+        self.service.handle_user(room_id=room_name, user=channel_name)
 
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -80,7 +81,7 @@ class PersonlChatConsumer(AsyncWebsocketConsumer):
     async def draw(self, event):
         """Handling sending drawing signals to all users in game room"""
         try:
-            await self.send(text_data = json.dumps({'type': 'draw', 'color': event['color'], 'username': event["username"], 'last_x': event["last_x"], 'last_y': event['last_y'], 'offset_x': event['offset_x'], 'offset_y': event['offset_y']}))
+            await self.send(text_data = json.dumps({'type': 'recive_draw', 'color': event['color'], 'username': event["username"], 'last_x': event["last_x"], 'last_y': event['last_y'], 'offset_x': event['offset_x'], 'offset_y': event['offset_y']}))
         # FIXME: add proper error handling
         except json.JSONDecodeError:
             await self.send(text_data=json.dumps({
