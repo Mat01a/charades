@@ -12,7 +12,6 @@ const roomName = ref(null)
 const canvas = ref(null)
 const messages = ref([])
 // WS connection
-let url = "ws://127.0.0.1:8000/ws/chat/" + roomName.value
 let socket
 
 
@@ -44,7 +43,6 @@ function sendMessage(data)
     try
     {
         socket.send(JSON.stringify({"type": "message", "username": username.value, "message": data.message}))
-        //messages.value.push(`${username.value}: ${data.message}`)
         
     }
     catch(e)
@@ -76,7 +74,6 @@ function connect()
         {
             canvas.value.reciveDrawing(parsedJson)
         }
-            //recive_drawing({"lastX": parsedJson.last_x, "color": parsedJson.color, "lastY": parsedJson.last_y, "offsetX": parsedJson.offset_x, "offsetY": parsedJson.offset_y})
     }
 }
 
@@ -105,7 +102,7 @@ function sendDrawing(data: DrawingData)
                 </div>
             </div>
             <ClientOnly>
-                <UModal :dismissible="true" v-model:open="isOpened">
+                <UModal :dismissible="false" v-model:open="isOpened">
                     <!-- modal -->
                     <template #content>
                         <div class="h-32 mt-12 m-6 grid col-span-12 row-span-12 gap-4">
