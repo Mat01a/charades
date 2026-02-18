@@ -54,7 +54,9 @@ function sendMessage(data)
 
 function connect()
 {
-    let url = "ws://127.0.0.1:8000/ws/chat/" + roomName.value
+    const config = useRuntimeConfig()
+    console.log(config)
+    let url = config.public.wsUrl + "/ws/chat/" + roomName.value
     socket = new WebSocket(url)
     socket.onopen = () => {
         canvas.value.clearCanvas()
