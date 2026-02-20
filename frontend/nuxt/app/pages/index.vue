@@ -55,7 +55,6 @@ function sendMessage(data)
 function connect()
 {
     const config = useRuntimeConfig()
-    console.log(config)
     let url = config.public.wsUrl + "/ws/chat/" + roomName.value
     socket = new WebSocket(url)
     socket.onopen = () => {
