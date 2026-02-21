@@ -91,7 +91,7 @@ function sendDrawing(data: DrawingData)
 
 <template>
     <div class="grid grid-cols-12 grid-rows-6 max-w-7xl w-full h-screen m-auto">
-        <div class="row-span-1 col-span-12 text-center font-bold text-4xl p-8">Puns game: {{ username }}</div>
+        <h1 class="row-span-1 col-span-12 text-center font-bold text-4xl p-8">Puns game: {{ username }}</h1>
         <div class="row-start-2 row-span-4 col-start-2 col-span-10 bg-slate-800 rounded-xl shadow-2xl grid grid-cols-12 grid-rows-12 p-4">
             <div class="row-span-2 col-span-12 grid grid-rows-3">
                 <div class="px-1 row-span-1 text-lg font-bold">
@@ -109,7 +109,7 @@ function sendDrawing(data: DrawingData)
                         <div class="h-32 mt-12 m-6 grid col-span-12 row-span-12 gap-4">
                             <div class="col-span-12 row-span-1 text-2xl text-center">Input name:</div>
                             <div class="col-span-12 row-span-11 h-full text-center p-4">
-                                <UInput v-model="username" />
+                                <UInput name="username" v-model="username" />
                                 <UButton type="submit" v-on:click="saveUsername" class="ml-8">Submit</UButton>
                             </div>
                         </div>
