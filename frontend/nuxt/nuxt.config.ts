@@ -1,5 +1,18 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  app: {
+    head: {
+      title: 'Charades',
+      htmlAttrs: {
+        lang: 'en'
+      },
+      link: [
+        {
+          rel: 'icon', type: 'image/x-icon', href: '/favicon.ico'
+        }
+      ]
+    }
+  },
   runtimeConfig:{
     public: {
       wsUrl: process.env.NUXT_PUBLIC_WS_URL
