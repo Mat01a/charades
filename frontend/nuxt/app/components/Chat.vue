@@ -27,14 +27,14 @@ function sendMessage()
 
 <template>
     <div class="col-start-10 col-span-3 bg-neutral-200 rounded-r-sm p-2 text-slate-900">
-        <div class="w-full h-113">
+        <div class="w-full h-113" id="chat">
             <p v-for="message in props.messages">
                 {{ message }}
             </p>
         </div>
         <div class="w-full h-10 my-2 py-1 bg-neutral-300 grid grid-cols-12 grid-rows-2 overflow-hidden p-2 gap-2">
-            <input type="text" class="p-2 col-span-9 h-8" v-model="chatInput"/>
-            <UButton type="submit" class="col-span-2 m-auto cursor-pointer hover:bg-green-500 transition-all duration-500 ease-in-out text-white font-bold" @click="sendMessage">Send</UButton>
+            <input type="text" class="p-2 col-span-9 h-8" v-model="chatInput" name="chatInput"/>
+            <UButton name="chatSubmit" type="submit" class="col-span-2 m-auto cursor-pointer hover:bg-green-500 transition-all duration-500 ease-in-out text-white font-bold" @click="sendMessage">Send</UButton>
         </div>
     </div>
 </template>

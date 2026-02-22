@@ -98,7 +98,7 @@ function sendDrawing(data: DrawingData)
                     Input room name:
                 </div>
                 <div class="row-span-1">
-                    <UInput placeholder="room name" v-model="roomName"/>
+                    <UInput placeholder="room name" v-model="roomName" name="roomName"/>
                     <UButton class="mx-2" @click="connect">Connect</UButton>
                 </div>
             </div>
